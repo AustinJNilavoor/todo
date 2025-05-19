@@ -94,6 +94,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget buildBody(List<Todo> todos) {
+    todos.sort((a, b) => (b.isTicked ? 0 : 1) - (a.isTicked ? 0 : 1));
     return ListView.builder(
       shrinkWrap: true,
       itemCount: todos.length,
@@ -110,8 +111,8 @@ class _HomePageState extends State<HomePage> {
               },
               icon: Icon(
                 todos[index].isTicked
-                    ? Icons.square_sharp
-                    : Icons.square_outlined,
+                    ? Icons.check_box
+                    : Icons.check_box_outline_blank,
               ),
             ),
             Text(
