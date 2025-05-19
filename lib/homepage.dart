@@ -113,7 +113,13 @@ class _HomePageState extends State<HomePage> {
                     : Icons.square_outlined,
               ),
             ),
-            Text(todos[index].todo, style: TextStyle()),
+            Text(
+              todos[index].todo,
+              style: TextStyle(
+                decoration:
+                    todos[index].isTicked ? TextDecoration.lineThrough : null,
+              ),
+            ),
             IconButton(
               onPressed: () {
                 deleteTodo(todos[index]);
