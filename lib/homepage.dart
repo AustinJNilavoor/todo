@@ -106,6 +106,7 @@ class _HomePageState extends State<HomePage> {
                 setState(() {
                   todos[index].isTicked = !todos[index].isTicked;
                 });
+                todos[index].save();
               },
               icon: Icon(
                 todos[index].isTicked
