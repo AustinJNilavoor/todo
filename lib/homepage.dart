@@ -15,6 +15,13 @@ class _HomePageState extends State<HomePage> {
   final labelController = TextEditingController();
   final formKey = GlobalKey<FormState>();
   @override
+  void dispose() {
+    todoController.dispose();
+    labelController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: ValueListenableBuilder<Box<Todo>>(
@@ -35,8 +42,6 @@ class _HomePageState extends State<HomePage> {
 
   Widget addDialog() {
     return AlertDialog(
-      contentPadding: const EdgeInsets.only(top: 20, left: 20),
-      // backgroundColor: Colors.grey.shade900,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(20.0)),
       ),
@@ -49,34 +54,22 @@ class _HomePageState extends State<HomePage> {
             TextFormField(
               validator: (todo) => todo == null || todo.isEmpty ? '!!' : null,
               controller: todoController,
-              // decoration: InputDecoration(
-              //     filled: true,
-              //     fillColor: Colors.grey.shade900,
-              //     border: InputBorder.none,
-              //     contentPadding: const EdgeInsets.only(
-              //         left: 15, bottom: 16, top: 75, right: 18),
-              //     hintText: "Amount",
-              //     hintStyle: const TextStyle(color: Colors.white70)),
-              // style: const TextStyle(fontSize: 50, color: Colors.white70),
-              // cursorColor: Colors.white70,
-              // cursorHeight: 62,
-              // textAlign: TextAlign.end,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.lightBlue.shade100,
+                border: InputBorder.none,
+                hintText: "ToDo",
+              ),
             ),
+            SizedBox(height: 10),
             TextFormField(
-              // validator: (todo) => todo != null ? '!!' : null,
               controller: labelController,
-              // decoration: InputDecoration(
-              //     filled: true,
-              //     fillColor: Colors.grey.shade900,
-              //     border: InputBorder.none,
-              //     contentPadding: const EdgeInsets.only(
-              //         left: 15, bottom: 16, top: 75, right: 18),
-              //     hintText: "Amount",
-              //     hintStyle: const TextStyle(color: Colors.white70)),
-              // style: const TextStyle(fontSize: 50, color: Colors.white70),
-              // cursorColor: Colors.white70,
-              // cursorHeight: 62,
-              // textAlign: TextAlign.end,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.lightBlue.shade100,
+                border: InputBorder.none,
+                hintText: "Label",
+              ),
             ),
           ],
         ),
@@ -92,6 +85,7 @@ class _HomePageState extends State<HomePage> {
         if (isValid) {
           print(todoctrl.text);
           addTodo(todoctrl.text);
+          todoctrl.text = '';
           Navigator.of(context).pop();
         }
       },
