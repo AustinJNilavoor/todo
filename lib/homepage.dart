@@ -14,11 +14,13 @@ class _HomePageState extends State<HomePage> {
   final todoController = TextEditingController();
   final labelController = TextEditingController();
   final searchController = TextEditingController();
+  String searchText = '';
   final formKey = GlobalKey<FormState>();
   @override
   void dispose() {
     todoController.dispose();
     labelController.dispose();
+    searchController.dispose();
     super.dispose();
   }
 
@@ -78,17 +80,18 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      actions: [addButton(context, todoController)],
+      actions: [addButton(context, todoController,labelController)],
     );
   }
 
-  Widget addButton(context, TextEditingController todoctrl) {
+  Widget addButton(context, TextEditingController todoctrl,TextEditingController labelController) {
     return TextButton(
       onPressed: () {
         final isValid = formKey.currentState!.validate();
         if (isValid) {
-          addTodo(todoctrl.text);
+          addTodo(todoctrl.text,labelController.text);
           todoctrl.text = '';
+          labelController.text = '';
           Navigator.of(context).pop();
         }
       },
@@ -97,62 +100,77 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget buildBody(List<Todo> todos) {
-    todos.sort((a, b) => (b.isTicked ? 0 : 1) - (a.isTicked ? 0 : 1));
+    final newtodos =
+        searchText == ''
+            ? todos
+            : todos.where((todo) {
+              return (todo.todo.toLowerCase().contains(
+                    searchText.toLowerCase(),
+                  ) ||
+                  todo.labels.toLowerCase().contains(searchText.toLowerCase()));
+            }).toList();
+    newtodos.sort((a, b) => (b.isTicked ? 0 : 1) - (a.isTicked ? 0 : 1));
     return SizedBox(
       width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(height: 30,),
+          SizedBox(height: 30),
           Container(
             width: 500,
             decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.blue, 
-                width: 2, 
-              ),
+              border: Border.all(color: Colors.blue, width: 2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Padding(
-              padding: const EdgeInsets.only(left: 8.0,right: 8),
+              padding: const EdgeInsets.only(left: 8.0, right: 8),
               child: TextField(
-                decoration: InputDecoration(hintText: "Search",border: InputBorder.none,),
+                controller: searchController,
+                onChanged: (value) {
+                  setState(() {
+                    searchText = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: "Search",
+                  border: InputBorder.none,
+                ),
               ),
             ),
           ),
-          SizedBox(height: 30,),
+          SizedBox(height: 30),
           Expanded(
             child: SizedBox(
               width: 700,
               child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: todos.length,
+                itemCount: newtodos.length,
                 padding: EdgeInsets.all(12),
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.all(4.0),
                     child: Container(
-                      decoration: BoxDecoration(color: Colors.grey.shade300,borderRadius: BorderRadius.circular(10)),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.all(3.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          // mainAxisSize: MainAxisSize.min,
                           children: [
                             Row(
-                              // mainAxisAlignment: MainAxisAlignment.start,
-                              // crossAxisAlignment: CrossAxisAlignment.start,
-                              // mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
                                   onPressed: () {
                                     setState(() {
-                                      todos[index].isTicked = !todos[index].isTicked;
+                                      newtodos[index].isTicked =
+                                          !newtodos[index].isTicked;
                                     });
-                                    todos[index].save();
+                                    newtodos[index].save();
                                   },
                                   icon: Icon(
-                                    todos[index].isTicked
+                                    newtodos[index].isTicked
                                         ? Icons.check_box
                                         : Icons.check_box_outline_blank,
                                   ),
@@ -163,10 +181,10 @@ class _HomePageState extends State<HomePage> {
                                     softWrap: true,
                                     overflow: TextOverflow.visible,
                                     maxLines: null,
-                                    todos[index].todo,
+                                    newtodos[index].todo,
                                     style: TextStyle(
                                       decoration:
-                                          todos[index].isTicked
+                                          newtodos[index].isTicked
                                               ? TextDecoration.lineThrough
                                               : null,
                                     ),
@@ -174,10 +192,10 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ],
                             ),
-                              
+
                             IconButton(
                               onPressed: () {
-                                deleteTodo(todos[index]);
+                                deleteTodo(newtodos[index]);
                               },
                               icon: Icon(Icons.delete),
                             ),
@@ -195,12 +213,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void addTodo(todoctrl) {
+  void addTodo(todoctrl,label) {
     final todo =
         Todo()
           ..todo = todoctrl
           ..isTicked = false
-          ..labels = "Flutter";
+          ..labels = label;
     final box = Boxes.getTodos();
     box.add(todo);
   }
