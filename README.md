@@ -1,6 +1,8 @@
 # todo
 
-A new Flutter project.
+## Screenshots
+<img src="Screenshots/todo1.png" width=30% height=30%>
+<img src="Screenshots/todo2.png" width=30% height=30%>
 
 ## Getting Started
 
