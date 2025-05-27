@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo/box/boxes.dart';
+import 'package:todo/cubit/todo_cubit.dart';
 import 'package:todo/model/todosclass.dart';
 
 class HomePage extends StatefulWidget {
@@ -27,11 +28,9 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ValueListenableBuilder<Box<Todo>>(
-        valueListenable: Boxes.getTodos().listenable(),
-        builder: (context, box, _) {
-          final transactions = box.values.toList().cast<Todo>();
-          return buildBody(transactions);
+      body: BlocBuilder<TodoCubit, List<Todo>>(
+        builder: (context, todos) {
+          return buildBody(todos);
         },
       ),
       floatingActionButton: FloatingActionButton(
@@ -40,62 +39,6 @@ class _HomePageState extends State<HomePage> {
         },
         child: Icon(Icons.add),
       ),
-    );
-  }
-
-  Widget addDialog() {
-    return AlertDialog(
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(20.0)),
-      ),
-      title: const Text('Add ToDo'),
-      content: Form(
-        key: formKey,
-        child: SizedBox(
-          width: 300,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                validator: (todo) => todo == null || todo.isEmpty ? '!!' : null,
-                controller: todoController,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                  border: InputBorder.none,
-                  hintText: "ToDo",
-                ),
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: labelController,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                  border: InputBorder.none,
-                  hintText: "Label",
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      actions: [addButton(context, todoController,labelController)],
-    );
-  }
-
-  Widget addButton(context, TextEditingController todoctrl,TextEditingController labelController) {
-    return TextButton(
-      onPressed: () {
-        final isValid = formKey.currentState!.validate();
-        if (isValid) {
-          addTodo(todoctrl.text,labelController.text);
-          todoctrl.text = '';
-          labelController.text = '';
-          Navigator.of(context).pop();
-        }
-      },
-      child: Text("Add"),
     );
   }
 
@@ -163,11 +106,13 @@ class _HomePageState extends State<HomePage> {
                               children: [
                                 IconButton(
                                   onPressed: () {
-                                    setState(() {
-                                      newtodos[index].isTicked =
-                                          !newtodos[index].isTicked;
-                                    });
-                                    newtodos[index].save();
+                                    BlocProvider.of<TodoCubit>(
+                                      context,
+                                    ).updateTodo(todo: newtodos[index]);
+                                    // setState(() {
+                                    //   newtodos[index].isTicked =
+                                    //       !newtodos[index].isTicked;
+                                    // });
                                   },
                                   icon: Icon(
                                     newtodos[index].isTicked
@@ -195,7 +140,10 @@ class _HomePageState extends State<HomePage> {
 
                             IconButton(
                               onPressed: () {
-                                deleteTodo(newtodos[index]);
+                                BlocProvider.of<TodoCubit>(
+                                  context,
+                                ).deleteTodo(todo: newtodos[index]);
+                                // deleteTodo(newtodos[index]);
                               },
                               icon: Icon(Icons.delete),
                             ),
@@ -213,7 +161,70 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void addTodo(todoctrl,label) {
+  Widget addDialog() {
+    return AlertDialog(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(20.0)),
+      ),
+      title: const Text('Add ToDo'),
+      content: Form(
+        key: formKey,
+        child: SizedBox(
+          width: 300,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                validator: (todo) => todo == null || todo.isEmpty ? '!!' : null,
+                controller: todoController,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  border: InputBorder.none,
+                  hintText: "ToDo",
+                ),
+              ),
+              SizedBox(height: 10),
+              TextFormField(
+                controller: labelController,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  border: InputBorder.none,
+                  hintText: "Label",
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [addButton(context, todoController, labelController)],
+    );
+  }
+
+  Widget addButton(
+    context,
+    TextEditingController todoctrl,
+    TextEditingController labelController,
+  ) {
+    return TextButton(
+      onPressed: () {
+        final isValid = formKey.currentState!.validate();
+        if (isValid) {
+          BlocProvider.of<TodoCubit>(
+            context,
+          ).addTodo(todoctrl: todoctrl.text, label: labelController.text);
+
+          todoctrl.text = '';
+          labelController.text = '';
+          Navigator.of(context).pop();
+        }
+      },
+      child: Text("Add"),
+    );
+  }
+
+  void addTodo(todoctrl, label) {
     final todo =
         Todo()
           ..todo = todoctrl
