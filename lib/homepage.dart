@@ -109,10 +109,6 @@ class _HomePageState extends State<HomePage> {
                                     BlocProvider.of<TodoCubit>(
                                       context,
                                     ).updateTodo(todo: newtodos[index]);
-                                    // setState(() {
-                                    //   newtodos[index].isTicked =
-                                    //       !newtodos[index].isTicked;
-                                    // });
                                   },
                                   icon: Icon(
                                     newtodos[index].isTicked
@@ -143,7 +139,6 @@ class _HomePageState extends State<HomePage> {
                                 BlocProvider.of<TodoCubit>(
                                   context,
                                 ).deleteTodo(todo: newtodos[index]);
-                                // deleteTodo(newtodos[index]);
                               },
                               icon: Icon(Icons.delete),
                             ),
@@ -223,20 +218,4 @@ class _HomePageState extends State<HomePage> {
       child: Text("Add"),
     );
   }
-
-  void addTodo(todoctrl, label) {
-    final todo =
-        Todo()
-          ..todo = todoctrl
-          ..isTicked = false
-          ..labels = label;
-    final box = Boxes.getTodos();
-    box.add(todo);
-  }
-
-  void deleteTodo(Todo todo) {
-    todo.delete();
-  }
-
-  void editTodo(Todo todo) {}
 }
